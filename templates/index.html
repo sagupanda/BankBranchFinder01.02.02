@@ -69,28 +69,53 @@
                         <form action="{{ url_for('search') }}" method="GET" class="mb-0" id="bankForm">
                             <div class="row g-3">
                                 <div class="col-md-6">
-                                    <label for="bankSelect" class="form-label">Bank Name *</label>
-                                    <select class="form-select" name="bank" id="bankSelect" required>
-                                        <option value="">Select Bank</option>
-                                    </select>
+                                    <label for="bankInput" class="form-label">Bank Name *</label>
+                                    <div class="position-relative">
+                                        <input type="text" 
+                                               class="form-control" 
+                                               name="bank" 
+                                               id="bankInput"
+                                               placeholder="Type bank name..."
+                                               autocomplete="off"
+                                               required>
+                                        <div id="bankSuggestions" class="autocomplete-results"></div>
+                                    </div>
                                 </div>
                                 <div class="col-md-6">
-                                    <label for="stateSelect" class="form-label">State</label>
-                                    <select class="form-select" name="state" id="stateSelect" disabled>
-                                        <option value="">Select State</option>
-                                    </select>
+                                    <label for="stateInput" class="form-label">State</label>
+                                    <div class="position-relative">
+                                        <input type="text" 
+                                               class="form-control" 
+                                               name="state" 
+                                               id="stateInput"
+                                               placeholder="Type state name..."
+                                               autocomplete="off">
+                                        <div id="stateSuggestions" class="autocomplete-results"></div>
+                                    </div>
                                 </div>
                                 <div class="col-md-6">
-                                    <label for="citySelect" class="form-label">City/District</label>
-                                    <select class="form-select" name="city" id="citySelect" disabled>
-                                        <option value="">Select City/District</option>
-                                    </select>
+                                    <label for="cityInput" class="form-label">City/District</label>
+                                    <div class="position-relative">
+                                        <input type="text" 
+                                               class="form-control" 
+                                               name="city" 
+                                               id="cityInput"
+                                               placeholder="Type city name..."
+                                               autocomplete="off">
+                                        <div id="citySuggestions" class="autocomplete-results"></div>
+                                    </div>
                                 </div>
                                 <div class="col-md-6">
-                                    <label for="branchSelect" class="form-label">Branch</label>
-                                    <select class="form-select" name="branch" id="branchSelect" disabled>
-                                        <option value="">Select Branch</option>
-                                    </select>
+                                    <label for="branchInput" class="form-label">Branch</label>
+                                    <div class="position-relative">
+                                        <input type="text" 
+                                               class="form-control" 
+                                               name="branch" 
+                                               id="branchInput"
+                                               placeholder="Type branch name..."
+                                               autocomplete="off">
+                                        <div id="branchSuggestions" class="autocomplete-results"></div>
+                                    </div>
                                 </div>
                                 <div class="col-12">
                                     <button type="submit" class="btn btn-primary btn-lg w-100">
@@ -223,6 +248,88 @@ document.addEventListener('DOMContentLoaded', function() {
         initializeAutocomplete('searchInput', 'autocompleteResults');
     }
     
+    // Initialize dynamic autocomplete for bank details form
+    initializeDynamicAutocomplete('bankInput', 'bankSuggestions', '/api/dynamic_banks');
+    initializeDynamicAutocomplete('stateInput', 'stateSuggestions', '/api/dynamic_states');
+    initializeDynamicAutocomplete('cityInput', 'citySuggestions', '/api/dynamic_cities');
+    initializeDynamicAutocomplete('branchInput', 'branchSuggestions', '/api/dynamic_branches');
+    
+    // Dynamic autocomplete function for bank details form
+    function initializeDynamicAutocomplete(inputId, resultsId, apiUrl) {
+        const input = document.getElementById(inputId);
+        const results = document.getElementById(resultsId);
+        
+        if (!input || !results) return;
+        
+        let timeout;
+        
+        input.addEventListener('input', function() {
+            const query = this.value.trim();
+            
+            clearTimeout(timeout);
+            
+            if (query.length < 2) {
+                results.style.display = 'none';
+                return;
+            }
+            
+            timeout = setTimeout(() => {
+                // Get form context for filtered results
+                const bankValue = document.getElementById('bankInput').value;
+                const stateValue = document.getElementById('stateInput').value;
+                const cityValue = document.getElementById('cityInput').value;
+                
+                let url = `${apiUrl}?q=${encodeURIComponent(query)}`;
+                if (apiUrl !== '/api/dynamic_banks' && bankValue) {
+                    url += `&bank=${encodeURIComponent(bankValue)}`;
+                }
+                if (apiUrl === '/api/dynamic_cities' && stateValue) {
+                    url += `&state=${encodeURIComponent(stateValue)}`;
+                }
+                if (apiUrl === '/api/dynamic_branches' && cityValue) {
+                    url += `&city=${encodeURIComponent(cityValue)}`;
+                }
+                
+                fetch(url)
+                    .then(response => response.json())
+                    .then(data => {
+                        results.innerHTML = '';
+                        
+                        if (data.length === 0) {
+                            results.style.display = 'none';
+                            return;
+                        }
+                        
+                        data.forEach(item => {
+                            const div = document.createElement('div');
+                            div.className = 'autocomplete-item';
+                            div.textContent = item.label;
+                            
+                            div.addEventListener('click', function() {
+                                input.value = item.value;
+                                results.style.display = 'none';
+                            });
+                            
+                            results.appendChild(div);
+                        });
+                        
+                        results.style.display = 'block';
+                    })
+                    .catch(error => {
+                        console.error('Autocomplete error:', error);
+                        results.style.display = 'none';
+                    });
+            }, 300);
+        });
+        
+        // Hide results when clicking outside
+        document.addEventListener('click', function(e) {
+            if (!input.contains(e.target) && !results.contains(e.target)) {
+                results.style.display = 'none';
+            }
+        });
+    }
+    
     // Handle search mode toggle
     const ifscMode = document.getElementById('ifscMode');
     const bankMode = document.getElementById('bankMode');
@@ -240,130 +347,9 @@ document.addEventListener('DOMContentLoaded', function() {
         if (this.checked) {
             bankForm.classList.remove('d-none');
             ifscForm.classList.add('d-none');
-            loadBanks(); // Load banks when switching to bank mode
         }
     });
-    
-    // Load banks on page load since Bank Details is now default
-    loadBanks();
-    
-    // Dropdown elements
-    const bankSelect = document.getElementById('bankSelect');
-    const stateSelect = document.getElementById('stateSelect');
-    const citySelect = document.getElementById('citySelect');
-    const branchSelect = document.getElementById('branchSelect');
-    
-    // Load banks function
-    function loadBanks() {
-        fetch('/api/banks')
-            .then(response => response.json())
-            .then(banks => {
-                bankSelect.innerHTML = '<option value="">Select Bank</option>';
-                banks.forEach(bank => {
-                    const option = document.createElement('option');
-                    option.value = bank;
-                    option.textContent = bank;
-                    bankSelect.appendChild(option);
-                });
-            })
-            .catch(error => console.error('Error loading banks:', error));
-    }
-    
-    // Bank selection change
-    bankSelect.addEventListener('change', function() {
-        const selectedBank = this.value;
-        
-        // Reset dependent dropdowns
-        stateSelect.innerHTML = '<option value="">Select State</option>';
-        citySelect.innerHTML = '<option value="">Select City</option>';
-        branchSelect.innerHTML = '<option value="">Select Branch</option>';
-        
-        if (selectedBank) {
-            stateSelect.disabled = false;
-            
-            // Load states for selected bank
-            fetch(`/api/states?bank=${encodeURIComponent(selectedBank)}`)
-                .then(response => response.json())
-                .then(states => {
-                    states.forEach(state => {
-                        const option = document.createElement('option');
-                        option.value = state;
-                        option.textContent = state;
-                        stateSelect.appendChild(option);
-                    });
-                })
-                .catch(error => console.error('Error loading states:', error));
-        } else {
-            stateSelect.disabled = true;
-            citySelect.disabled = true;
-            branchSelect.disabled = true;
-        }
-    });
-    
-    // State selection change
-    stateSelect.addEventListener('change', function() {
-        const selectedBank = bankSelect.value;
-        const selectedState = this.value;
-        
-        // Reset dependent dropdowns
-        citySelect.innerHTML = '<option value="">Select City/District</option>';
-        branchSelect.innerHTML = '<option value="">Select Branch</option>';
-        
-        if (selectedState) {
-            citySelect.disabled = false;
-            
-            // Load cities for selected bank and state
-            fetch(`/api/cities?bank=${encodeURIComponent(selectedBank)}&state=${encodeURIComponent(selectedState)}`)
-                .then(response => response.json())
-                .then(cities => {
-                    cities.forEach(city => {
-                        const option = document.createElement('option');
-                        option.value = city;
-                        option.textContent = city;
-                        citySelect.appendChild(option);
-                    });
-                })
-                .catch(error => console.error('Error loading cities:', error));
-        } else {
-            citySelect.disabled = true;
-            branchSelect.disabled = true;
-        }
-    });
-    
-    // City selection change
-    citySelect.addEventListener('change', function() {
-        const selectedBank = bankSelect.value;
-        const selectedState = stateSelect.value;
-        const selectedCity = this.value;
-        
-        // Reset branch dropdown
-        branchSelect.innerHTML = '<option value="">Select Branch</option>';
-        
-        if (selectedCity) {
-            branchSelect.disabled = false;
-            
-            // Load branches for selected bank, state, and city
-            const params = new URLSearchParams({
-                bank: selectedBank,
-                state: selectedState,
-                city: selectedCity
-            });
-            
-            fetch(`/api/branches?${params}`)
-                .then(response => response.json())
-                .then(branches => {
-                    branches.forEach(branch => {
-                        const option = document.createElement('option');
-                        option.value = branch;
-                        option.textContent = branch;
-                        branchSelect.appendChild(option);
-                    });
-                })
-                .catch(error => console.error('Error loading branches:', error));
-        } else {
-            branchSelect.disabled = true;
-        }
-    });
+
 });
 </script>
 {% endblock %}

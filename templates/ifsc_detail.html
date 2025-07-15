@@ -72,17 +72,20 @@
                     </div>
                     
                     <!-- Contact Info -->
-                    {% if bank_info.PHONE %}
+                    <!-- Phone Number -->
                     <div class="row mb-3">
                         <div class="col-sm-3">
                             <strong>Phone:</strong>
                         </div>
                         <div class="col-sm-9">
                             <i class="fas fa-phone text-success me-2"></i>
-                            {% if bank_info['STD CODE'] %}+91-{{ bank_info['STD CODE'] }}-{% endif %}{{ bank_info.PHONE }}
+                            {% if bank_info.PHONE and bank_info.PHONE != 'N/A' %}
+                                {% if bank_info['STD CODE'] and bank_info['STD CODE'] != 'N/A' %}+91-{{ bank_info['STD CODE'] }}-{% endif %}{{ bank_info.PHONE }}
+                            {% else %}
+                                N/A
+                            {% endif %}
                         </div>
                     </div>
-                    {% endif %}
                     
                     <!-- Address -->
                     {% if bank_info.ADDRESS %}

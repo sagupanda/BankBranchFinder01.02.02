@@ -44,7 +44,8 @@ function initializeAutocomplete(inputId, resultsId) {
         } else if (e.key === 'Enter') {
             e.preventDefault();
             if (currentFocus > -1 && items[currentFocus]) {
-                selectItem(items[currentFocus].textContent, input, results);
+                const value = items[currentFocus].querySelector('span').textContent;
+                selectItem(value, input, results);
             } else {
                 // Submit the form
                 input.closest('form').submit();
@@ -85,10 +86,20 @@ function initializeAutocomplete(inputId, resultsId) {
         suggestions.forEach(suggestion => {
             const item = document.createElement('div');
             item.className = 'autocomplete-item';
-            item.textContent = suggestion;
+            
+            // Handle both string and object suggestions
+            const displayText = typeof suggestion === 'string' ? suggestion : suggestion.label;
+            const value = typeof suggestion === 'string' ? suggestion : suggestion.value;
+            
+            item.innerHTML = `
+                <div class="d-flex justify-content-between align-items-center">
+                    <span>${displayText}</span>
+                    <small class="text-muted">${suggestion.type || ''}</small>
+                </div>
+            `;
             
             item.addEventListener('click', function() {
-                selectItem(suggestion, inputElement, resultsContainer);
+                selectItem(value, inputElement, resultsContainer);
             });
             
             resultsContainer.appendChild(item);

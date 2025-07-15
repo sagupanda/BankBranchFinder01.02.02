@@ -53,8 +53,8 @@ def get_bank_details_from_razorpay(ifsc_code):
                 'CITY2': data.get('CITY', ''),
                 'STATE': data.get('STATE', ''),
                 'ADDRESS': data.get('ADDRESS', ''),
-                'PHONE': '',
-                'STD CODE': '',
+                'PHONE': 'N/A',
+                'STD CODE': 'N/A',
                 'CONTACT': data.get('CONTACT', ''),
                 'RTGS': data.get('RTGS', False),
                 'SWIFT': data.get('SWIFT', ''),
@@ -314,6 +314,105 @@ def get_states():
     df = init_data()
     states = sorted(df['STATE'].unique())
     return jsonify(states)
+
+@app.route('/api/dynamic_banks')
+def get_dynamic_banks():
+    """Get banks for dynamic autocomplete"""
+    df = init_data()
+    query = request.args.get('q', '').strip()
+    
+    if not query or len(query) < 2:
+        return jsonify([])
+    
+    # Search for banks matching the query
+    filtered_banks = df[df['BANK'].str.contains(query, case=False, na=False)]['BANK'].unique()
+    results = [{'label': bank, 'value': bank, 'type': 'bank'} for bank in sorted(filtered_banks)[:10]]
+    
+    return jsonify(results)
+
+@app.route('/api/dynamic_states')
+def get_dynamic_states():
+    """Get states for dynamic autocomplete"""
+    df = init_data()
+    query = request.args.get('q', '').strip()
+    bank = request.args.get('bank', '').strip()
+    
+    if not query or len(query) < 2:
+        return jsonify([])
+    
+    # Filter by bank if provided
+    if bank:
+        df = df[df['BANK'].str.contains(bank, case=False, na=False)]
+    
+    # Search for states matching the query
+    filtered_states = df[df['STATE'].str.contains(query, case=False, na=False)]['STATE'].unique()
+    results = [{'label': state, 'value': state, 'type': 'state'} for state in sorted(filtered_states)[:10]]
+    
+    return jsonify(results)
+
+@app.route('/api/dynamic_cities')
+def get_dynamic_cities():
+    """Get cities for dynamic autocomplete"""
+    df = init_data()
+    query = request.args.get('q', '').strip()
+    bank = request.args.get('bank', '').strip()
+    state = request.args.get('state', '').strip()
+    
+    if not query or len(query) < 2:
+        return jsonify([])
+    
+    # Filter by bank and state if provided
+    if bank:
+        df = df[df['BANK'].str.contains(bank, case=False, na=False)]
+    if state:
+        df = df[df['STATE'].str.contains(state, case=False, na=False)]
+    
+    # Search for cities matching the query
+    city_matches = df[
+        (df['CITY1'].str.contains(query, case=False, na=False)) |
+        (df['CITY2'].str.contains(query, case=False, na=False))
+    ]
+    
+    cities = []
+    for _, row in city_matches.iterrows():
+        if row['CITY1'] and query.lower() in row['CITY1'].lower():
+            cities.append(row['CITY1'])
+        if row['CITY2'] and query.lower() in row['CITY2'].lower():
+            cities.append(row['CITY2'])
+    
+    unique_cities = sorted(list(set(cities)))
+    results = [{'label': city, 'value': city, 'type': 'city'} for city in unique_cities[:10]]
+    
+    return jsonify(results)
+
+@app.route('/api/dynamic_branches')
+def get_dynamic_branches():
+    """Get branches for dynamic autocomplete"""
+    df = init_data()
+    query = request.args.get('q', '').strip()
+    bank = request.args.get('bank', '').strip()
+    state = request.args.get('state', '').strip()
+    city = request.args.get('city', '').strip()
+    
+    if not query or len(query) < 2:
+        return jsonify([])
+    
+    # Filter by bank, state, and city if provided
+    if bank:
+        df = df[df['BANK'].str.contains(bank, case=False, na=False)]
+    if state:
+        df = df[df['STATE'].str.contains(state, case=False, na=False)]
+    if city:
+        df = df[
+            (df['CITY1'].str.contains(city, case=False, na=False)) |
+            (df['CITY2'].str.contains(city, case=False, na=False))
+        ]
+    
+    # Search for branches matching the query
+    filtered_branches = df[df['BRANCH'].str.contains(query, case=False, na=False)]['BRANCH'].unique()
+    results = [{'label': branch, 'value': branch, 'type': 'branch'} for branch in sorted(filtered_branches)[:10]]
+    
+    return jsonify(results)
 
 @app.route('/sitemap.xml')
 @cache.cached(timeout=3600)
