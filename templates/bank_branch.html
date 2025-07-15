@@ -1,175 +1,145 @@
 {% extends "base.html" %}
 
-{% block title %}{{ bank_info.get('Bank Name', 'Bank') }} {{ bank_info.get('Branch', 'Branch') }} - {{ bank_info.get('City', 'City') }} Branch Details{% endblock %}
+{% block title %}
+{% if branches %}{{ bank_name }} Branches in {{ city|title }} - IFSC Codes{% else %}Bank Branch Not Found{% endif %}
+{% endblock %}
 
-{% block description %}Complete details for {{ bank_info.get('Bank Name', 'Bank') }} {{ bank_info.get('Branch', 'Branch') }} branch in {{ bank_info.get('City', 'City') }}, {{ bank_info.get('State', 'State') }}. Find IFSC code, MICR code, address, and contact information.{% endblock %}
+{% block description %}
+{% if branches %}Find all {{ bank_name }} branch IFSC codes in {{ city|title }}. Complete branch details including addresses and contact information.{% else %}Bank branch information not found.{% endif %}
+{% endblock %}
 
 {% block content %}
-{% if error %}
-<div class="row justify-content-center">
-    <div class="col-md-8">
-        <div class="card">
-            <div class="card-body text-center">
-                <i class="fas fa-exclamation-triangle fa-3x text-warning mb-3"></i>
-                <h3>Bank Branch Not Found</h3>
-                <p class="text-muted">The requested bank branch was not found in our database.</p>
-                <a href="{{ url_for('index') }}" class="btn btn-primary">
-                    <i class="fas fa-arrow-left me-2"></i>Back to Search
-                </a>
+<div class="container mt-4">
+    {% if error %}
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card border-warning">
+                <div class="card-header bg-warning text-dark">
+                    <h4 class="mb-0"><i class="fas fa-exclamation-triangle me-2"></i>Branch Not Found</h4>
+                </div>
+                <div class="card-body text-center">
+                    <p class="text-muted">The bank branch you're looking for was not found in our database.</p>
+                    <a href="{{ url_for('index') }}" class="btn btn-primary">
+                        <i class="fas fa-search me-2"></i>Search Again
+                    </a>
+                </div>
             </div>
         </div>
     </div>
-</div>
-{% else %}
-<div class="row">
-    <div class="col-12">
-        <nav aria-label="breadcrumb">
-            <ol class="breadcrumb">
-                <li class="breadcrumb-item"><a href="{{ url_for('index') }}">Home</a></li>
-                <li class="breadcrumb-item">{{ bank_info.get('Bank Name', 'Bank') }}</li>
-                <li class="breadcrumb-item">{{ bank_info.get('City', 'City') }}</li>
-                <li class="breadcrumb-item active">{{ bank_info.get('Branch', 'Branch') }}</li>
-            </ol>
-        </nav>
-    </div>
-</div>
-
-<div class="row">
-    <div class="col-lg-8">
-        <div class="card">
-            <div class="card-header bg-primary text-white">
-                <h2 class="card-title mb-0">
-                    <i class="fas fa-building me-2"></i>{{ bank_info.get('Bank Name', 'N/A') }}
-                </h2>
-                <p class="mb-0">{{ bank_info.get('Branch', 'N/A') }} Branch</p>
-            </div>
-            <div class="card-body">
-                <div class="row">
-                    <div class="col-md-6">
-                        <div class="info-item">
-                            <label class="fw-bold text-primary">Branch Name:</label>
-                            <span>{{ bank_info.get('Branch', 'N/A') }}</span>
-                        </div>
-                        
-                        <div class="info-item">
-                            <label class="fw-bold text-primary">IFSC Code:</label>
-                            <span class="ifsc-code">{{ bank_info.get('IFSC', 'N/A') }}</span>
-                        </div>
-                        
-                        <div class="info-item">
-                            <label class="fw-bold text-primary">MICR Code:</label>
-                            <span>{{ bank_info.get('MICR', 'N/A') }}</span>
-                        </div>
-                    </div>
-                    
-                    <div class="col-md-6">
-                        <div class="info-item">
-                            <label class="fw-bold text-primary">City:</label>
-                            <span>{{ bank_info.get('City', 'N/A') }}</span>
-                        </div>
-                        
-                        <div class="info-item">
-                            <label class="fw-bold text-primary">State:</label>
-                            <span>{{ bank_info.get('State', 'N/A') }}</span>
-                        </div>
-                    </div>
+    {% else %}
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col-lg-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h1 class="h3 mb-1">{{ bank_name }}</h1>
+                    <p class="text-muted mb-0">
+                        <i class="fas fa-map-marker-alt me-1"></i>
+                        Branches in {{ city|replace('-', ' ')|title }}
+                    </p>
                 </div>
-                
-                <div class="row mt-3">
-                    <div class="col-12">
-                        <div class="info-item">
-                            <label class="fw-bold text-primary">Address:</label>
-                            <span>{{ bank_info.get('Address', 'N/A') }}</span>
-                        </div>
-                    </div>
-                </div>
+                <a href="{{ url_for('index') }}" class="btn btn-outline-primary">
+                    <i class="fas fa-search me-2"></i>New Search
+                </a>
             </div>
         </div>
     </div>
     
-    <div class="col-lg-4">
-        <div class="card">
-            <div class="card-header">
-                <h5 class="card-title mb-0">Quick Actions</h5>
-            </div>
-            <div class="card-body">
-                <a href="{{ url_for('ifsc_detail', ifsc_code=bank_info.get('IFSC', '')) }}" 
-                   class="btn btn-primary btn-sm w-100 mb-2">
-                    <i class="fas fa-info-circle me-2"></i>IFSC Details
-                </a>
-                
-                <button class="btn btn-outline-secondary btn-sm w-100 mb-2" onclick="copyToClipboard('{{ bank_info.get('IFSC', '') }}')">
-                    <i class="fas fa-copy me-2"></i>Copy IFSC Code
-                </button>
-                
-                <a href="{{ url_for('search') }}?q={{ bank_info.get('Bank Name', '') }} {{ bank_info.get('City', '') }}" 
-                   class="btn btn-outline-primary btn-sm w-100 mb-2">
-                    <i class="fas fa-search me-2"></i>Find More Branches
-                </a>
-                
-                <a href="{{ url_for('index') }}" class="btn btn-outline-success btn-sm w-100">
-                    <i class="fas fa-plus me-2"></i>New Search
-                </a>
-            </div>
-        </div>
-        
-        <div class="card mt-3">
-            <div class="card-header">
-                <h6 class="card-title mb-0">Branch Information</h6>
-            </div>
-            <div class="card-body">
-                <p class="small text-muted">
-                    This branch is located in {{ bank_info.get('City', 'N/A') }}, {{ bank_info.get('State', 'N/A') }} and provides full banking services.
-                </p>
-            </div>
-        </div>
-    </div>
-</div>
-
-<div class="row mt-4">
-    <div class="col-12">
-        <div class="card">
-            <div class="card-header">
-                <h5 class="card-title mb-0">Services Available</h5>
-            </div>
-            <div class="card-body">
-                <div class="row">
-                    <div class="col-md-3">
-                        <h6><i class="fas fa-credit-card text-primary me-2"></i>Account Services</h6>
-                        <ul class="list-unstyled small text-muted">
-                            <li>• Savings Account</li>
-                            <li>• Current Account</li>
-                            <li>• Fixed Deposits</li>
-                        </ul>
+    <!-- Branch Listings -->
+    <div class="row">
+        {% for branch in branches %}
+        <div class="col-lg-6 mb-4">
+            <div class="card h-100 shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">{{ branch.BRANCH }}</h5>
+                </div>
+                <div class="card-body">
+                    <!-- IFSC Code -->
+                    <div class="row mb-3">
+                        <div class="col-sm-4">
+                            <strong>IFSC Code:</strong>
+                        </div>
+                        <div class="col-sm-8">
+                            <code class="bg-light p-1">{{ branch.IFSC }}</code>
+                            <button class="btn btn-sm btn-outline-secondary ms-1" 
+                                    onclick="copyToClipboard('{{ branch.IFSC }}')">
+                                <i class="fas fa-copy"></i>
+                            </button>
+                        </div>
                     </div>
-                    <div class="col-md-3">
-                        <h6><i class="fas fa-money-bill-wave text-primary me-2"></i>Loan Services</h6>
-                        <ul class="list-unstyled small text-muted">
-                            <li>• Personal Loan</li>
-                            <li>• Home Loan</li>
-                            <li>• Car Loan</li>
-                        </ul>
+                    
+                    <!-- Location -->
+                    <div class="row mb-2">
+                        <div class="col-sm-4">
+                            <strong>Location:</strong>
+                        </div>
+                        <div class="col-sm-8">
+                            {{ branch.CITY1 }}{% if branch.CITY2 and branch.CITY2 != branch.CITY1 %}, {{ branch.CITY2 }}{% endif %}, {{ branch.STATE }}
+                        </div>
                     </div>
-                    <div class="col-md-3">
-                        <h6><i class="fas fa-exchange-alt text-primary me-2"></i>Fund Transfer</h6>
-                        <ul class="list-unstyled small text-muted">
-                            <li>• NEFT/RTGS</li>
-                            <li>• IMPS</li>
-                            <li>• UPI</li>
-                        </ul>
+                    
+                    {% if branch.PHONE %}
+                    <div class="row mb-2">
+                        <div class="col-sm-4">
+                            <strong>Phone:</strong>
+                        </div>
+                        <div class="col-sm-8">
+                            {% if branch['STD CODE'] %}{{ branch['STD CODE'] }}-{% endif %}{{ branch.PHONE }}
+                        </div>
                     </div>
-                    <div class="col-md-3">
-                        <h6><i class="fas fa-mobile-alt text-primary me-2"></i>Digital Services</h6>
-                        <ul class="list-unstyled small text-muted">
-                            <li>• Internet Banking</li>
-                            <li>• Mobile Banking</li>
-                            <li>• SMS Banking</li>
-                        </ul>
+                    {% endif %}
+                    
+                    {% if branch.ADDRESS %}
+                    <div class="row">
+                        <div class="col-sm-4">
+                            <strong>Address:</strong>
+                        </div>
+                        <div class="col-sm-8">
+                            <small class="text-muted">{{ branch.ADDRESS }}</small>
+                        </div>
                     </div>
+                    {% endif %}
+                </div>
+                <div class="card-footer bg-transparent">
+                    <a href="{{ url_for('ifsc_detail', ifsc_code=branch.IFSC) }}" 
+                       class="btn btn-primary btn-sm">
+                        <i class="fas fa-info-circle me-1"></i>Full Details
+                    </a>
                 </div>
             </div>
         </div>
+        {% endfor %}
     </div>
+    {% endif %}
 </div>
-{% endif %}
+{% endblock %}
+
+{% block scripts %}
+<script>
+function copyToClipboard(text) {
+    navigator.clipboard.writeText(text).then(function() {
+        // Create temporary toast notification
+        const toast = document.createElement('div');
+        toast.className = 'toast align-items-center text-white bg-success border-0 position-fixed';
+        toast.style.cssText = 'top: 20px; right: 20px; z-index: 9999;';
+        toast.innerHTML = `
+            <div class="d-flex">
+                <div class="toast-body">
+                    <i class="fas fa-check me-2"></i>IFSC code copied to clipboard!
+                </div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+            </div>
+        `;
+        document.body.appendChild(toast);
+        
+        const bsToast = new bootstrap.Toast(toast);
+        bsToast.show();
+        
+        // Remove toast after it's hidden
+        toast.addEventListener('hidden.bs.toast', function() {
+            document.body.removeChild(toast);
+        });
+    });
+}
+</script>
 {% endblock %}

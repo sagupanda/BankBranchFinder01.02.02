@@ -65,7 +65,7 @@ function initializeAutocomplete() {
     });
     
     function fetchSuggestions(query) {
-        fetch(`/autocomplete?q=${encodeURIComponent(query)}`)
+        fetch(`/api/autocomplete?q=${encodeURIComponent(query)}`)
             .then(response => response.json())
             .then(data => {
                 displaySuggestions(data);

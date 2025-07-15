@@ -1,0 +1,367 @@
+{% extends "base.html" %}
+
+{% block title %}India's Most Comprehensive IFSC Code & Bank Branch Finder - KnowYourIFSC{% endblock %}
+
+{% block description %}Find IFSC codes and bank branch details for 170,000+ Indian bank branches. Search by IFSC code, bank name, city, state, or branch name. Fast and accurate results from India's most comprehensive bank directory.{% endblock %}
+
+{% block content %}
+<div class="hero-section">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-8 text-center">
+                <h1 class="display-4 fw-bold text-primary mb-4">
+                    <img src="{{ url_for('static', filename='images/IFSCBLU.png') }}" alt="KnowYourIFSC" height="64" class="me-3">
+                    KnowYourIFSC
+                </h1>
+                <p class="lead mb-5">India's Most Comprehensive Bank Branch Directory - 170,000+ Branches at Your Fingertips</p>
+                
+                {% if error %}
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <i class="fas fa-exclamation-triangle me-2"></i>{{ error }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        
+        <!-- Search Form -->
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="search-card">
+                        <!-- Search Mode Toggle -->
+                        <div class="d-flex justify-content-center mb-4">
+                            <div class="btn-group" role="group" aria-label="Search mode">
+                                <input type="radio" class="btn-check" name="searchMode" id="bankMode" checked>
+                                <label class="btn btn-outline-primary" for="bankMode">
+                                    <i class="fas fa-building me-2"></i>Bank Details
+                                </label>
+                                
+                                <input type="radio" class="btn-check" name="searchMode" id="ifscMode">
+                                <label class="btn btn-outline-primary" for="ifscMode">
+                                    <i class="fas fa-code me-2"></i>IFSC Search
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- IFSC Search Form -->
+                        <form action="{{ url_for('search') }}" method="GET" class="mb-0 d-none" id="ifscForm">
+                            <div class="row g-3">
+                                <div class="col-md-8">
+                                    <div class="position-relative">
+                                        <input type="text" 
+                                               class="form-control form-control-lg" 
+                                               name="q" 
+                                               id="searchInput"
+                                               placeholder="Enter IFSC code, bank name, or city..."
+                                               autocomplete="off"
+                                               required>
+                                        <div id="autocompleteResults" class="autocomplete-results"></div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <button type="submit" class="btn btn-primary btn-lg w-100">
+                                        <i class="fas fa-search me-2"></i>Search
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+
+                        <!-- Bank Details Form -->
+                        <form action="{{ url_for('search') }}" method="GET" class="mb-0" id="bankForm">
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label for="bankSelect" class="form-label">Bank Name *</label>
+                                    <select class="form-select" name="bank" id="bankSelect" required>
+                                        <option value="">Select Bank</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="stateSelect" class="form-label">State</label>
+                                    <select class="form-select" name="state" id="stateSelect" disabled>
+                                        <option value="">Select State</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="citySelect" class="form-label">City/District</label>
+                                    <select class="form-select" name="city" id="citySelect" disabled>
+                                        <option value="">Select City/District</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="branchSelect" class="form-label">Branch</label>
+                                    <select class="form-select" name="branch" id="branchSelect" disabled>
+                                        <option value="">Select Branch</option>
+                                    </select>
+                                </div>
+                                <div class="col-12">
+                                    <button type="submit" class="btn btn-primary btn-lg w-100">
+                                        <i class="fas fa-search me-2"></i>Search Banks
+                                    </button>
+                                </div>
+                            </div>
+                            <input type="hidden" name="type" value="bank_details">
+                        </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Statistics Section -->
+<div class="container mt-5">
+    <div class="row text-center">
+        <div class="col-md-4 mb-4">
+            <div class="card border-0 h-100">
+                <div class="card-body">
+                    <div class="text-primary mb-3">
+                        <i class="fas fa-university fa-3x"></i>
+                    </div>
+                    <h3 class="card-title text-primary">{{ total_banks }}</h3>
+                    <p class="card-text text-muted">Banks Covered</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-4">
+            <div class="card border-0 h-100">
+                <div class="card-body">
+                    <div class="text-primary mb-3">
+                        <i class="fas fa-map-marker-alt fa-3x"></i>
+                    </div>
+                    <h3 class="card-title text-primary">{{ total_branches }}</h3>
+                    <p class="card-text text-muted">Total Branches</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-4">
+            <div class="card border-0 h-100">
+                <div class="card-body">
+                    <div class="text-primary mb-3">
+                        <i class="fas fa-clock fa-3x"></i>
+                    </div>
+                    <h3 class="card-title text-primary">Instant</h3>
+                    <p class="card-text text-muted">Search Results</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Examples Section -->
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-lg-12">
+            <h2 class="text-center mb-4">How to Search</h2>
+            <div class="row">
+                <div class="col-md-6 mb-4">
+                    <div class="card border-primary h-100">
+                        <div class="card-header bg-primary text-white">
+                            <h5 class="mb-0"><i class="fas fa-code me-2"></i>By IFSC Code</h5>
+                        </div>
+                        <div class="card-body">
+                            <p class="card-text">Enter the 11-character IFSC code to get complete branch details.</p>
+                            <div class="example-search">
+                                <strong>Example:</strong> <code>{{ sample_ifsc }}</code>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6 mb-4">
+                    <div class="card border-success h-100">
+                        <div class="card-header bg-success text-white">
+                            <h5 class="mb-0"><i class="fas fa-building me-2"></i>By Bank & City</h5>
+                        </div>
+                        <div class="card-body">
+                            <p class="card-text">Search by bank name and city to find all branches.</p>
+                            <div class="example-search">
+                                <strong>Example:</strong> <code>{{ sample_bank }} {{ sample_city }}</code>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Features Section -->
+<div class="container mt-5 mb-5">
+    <div class="row">
+        <div class="col-lg-12">
+            <h2 class="text-center mb-4">Why Choose Our IFSC Finder?</h2>
+            <div class="row">
+                <div class="col-md-3 mb-4 text-center">
+                    <i class="fas fa-bolt fa-3x text-warning mb-3"></i>
+                    <h5>Lightning Fast</h5>
+                    <p class="text-muted">Instant search results with autocomplete</p>
+                </div>
+                <div class="col-md-3 mb-4 text-center">
+                    <i class="fas fa-database fa-3x text-info mb-3"></i>
+                    <h5>Complete Database</h5>
+                    <p class="text-muted">All Indian banks and branches covered</p>
+                </div>
+                <div class="col-md-3 mb-4 text-center">
+                    <i class="fas fa-mobile-alt fa-3x text-success mb-3"></i>
+                    <h5>Mobile Friendly</h5>
+                    <p class="text-muted">Works perfectly on all devices</p>
+                </div>
+                <div class="col-md-3 mb-4 text-center">
+                    <i class="fas fa-shield-alt fa-3x text-primary mb-3"></i>
+                    <h5>Accurate & Secure</h5>
+                    <p class="text-muted">Latest data with secure search</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    initializeAutocomplete('searchInput', 'autocompleteResults');
+    
+    // Handle search mode toggle
+    const ifscMode = document.getElementById('ifscMode');
+    const bankMode = document.getElementById('bankMode');
+    const ifscForm = document.getElementById('ifscForm');
+    const bankForm = document.getElementById('bankForm');
+    
+    ifscMode.addEventListener('change', function() {
+        if (this.checked) {
+            ifscForm.classList.remove('d-none');
+            bankForm.classList.add('d-none');
+        }
+    });
+    
+    bankMode.addEventListener('change', function() {
+        if (this.checked) {
+            bankForm.classList.remove('d-none');
+            ifscForm.classList.add('d-none');
+            loadBanks(); // Load banks when switching to bank mode
+        }
+    });
+    
+    // Load banks on page load since Bank Details is now default
+    loadBanks();
+    
+    // Dropdown elements
+    const bankSelect = document.getElementById('bankSelect');
+    const stateSelect = document.getElementById('stateSelect');
+    const citySelect = document.getElementById('citySelect');
+    const branchSelect = document.getElementById('branchSelect');
+    
+    // Load banks function
+    function loadBanks() {
+        fetch('/api/banks')
+            .then(response => response.json())
+            .then(banks => {
+                bankSelect.innerHTML = '<option value="">Select Bank</option>';
+                banks.forEach(bank => {
+                    const option = document.createElement('option');
+                    option.value = bank;
+                    option.textContent = bank;
+                    bankSelect.appendChild(option);
+                });
+            })
+            .catch(error => console.error('Error loading banks:', error));
+    }
+    
+    // Bank selection change
+    bankSelect.addEventListener('change', function() {
+        const selectedBank = this.value;
+        
+        // Reset dependent dropdowns
+        stateSelect.innerHTML = '<option value="">Select State</option>';
+        citySelect.innerHTML = '<option value="">Select City</option>';
+        branchSelect.innerHTML = '<option value="">Select Branch</option>';
+        
+        if (selectedBank) {
+            stateSelect.disabled = false;
+            
+            // Load states for selected bank
+            fetch(`/api/states?bank=${encodeURIComponent(selectedBank)}`)
+                .then(response => response.json())
+                .then(states => {
+                    states.forEach(state => {
+                        const option = document.createElement('option');
+                        option.value = state;
+                        option.textContent = state;
+                        stateSelect.appendChild(option);
+                    });
+                })
+                .catch(error => console.error('Error loading states:', error));
+        } else {
+            stateSelect.disabled = true;
+            citySelect.disabled = true;
+            branchSelect.disabled = true;
+        }
+    });
+    
+    // State selection change
+    stateSelect.addEventListener('change', function() {
+        const selectedBank = bankSelect.value;
+        const selectedState = this.value;
+        
+        // Reset dependent dropdowns
+        citySelect.innerHTML = '<option value="">Select City/District</option>';
+        branchSelect.innerHTML = '<option value="">Select Branch</option>';
+        
+        if (selectedState) {
+            citySelect.disabled = false;
+            
+            // Load cities for selected bank and state
+            fetch(`/api/cities?bank=${encodeURIComponent(selectedBank)}&state=${encodeURIComponent(selectedState)}`)
+                .then(response => response.json())
+                .then(cities => {
+                    cities.forEach(city => {
+                        const option = document.createElement('option');
+                        option.value = city;
+                        option.textContent = city;
+                        citySelect.appendChild(option);
+                    });
+                })
+                .catch(error => console.error('Error loading cities:', error));
+        } else {
+            citySelect.disabled = true;
+            branchSelect.disabled = true;
+        }
+    });
+    
+    // City selection change
+    citySelect.addEventListener('change', function() {
+        const selectedBank = bankSelect.value;
+        const selectedState = stateSelect.value;
+        const selectedCity = this.value;
+        
+        // Reset branch dropdown
+        branchSelect.innerHTML = '<option value="">Select Branch</option>';
+        
+        if (selectedCity) {
+            branchSelect.disabled = false;
+            
+            // Load branches for selected bank, state, and city
+            const params = new URLSearchParams({
+                bank: selectedBank,
+                state: selectedState,
+                city: selectedCity
+            });
+            
+            fetch(`/api/branches?${params}`)
+                .then(response => response.json())
+                .then(branches => {
+                    branches.forEach(branch => {
+                        const option = document.createElement('option');
+                        option.value = branch;
+                        option.textContent = branch;
+                        branchSelect.appendChild(option);
+                    });
+                })
+                .catch(error => console.error('Error loading branches:', error));
+        } else {
+            branchSelect.disabled = true;
+        }
+    });
+});
+</script>
+{% endblock %}

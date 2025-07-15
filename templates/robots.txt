@@ -1,0 +1,15 @@
+User-agent: *
+Allow: /
+
+Sitemap: {{ url_for('sitemap', _external=True) }}
+
+# Allow search engines to crawl all pages
+Allow: /ifsc/
+Allow: /bank/
+Allow: /search
+
+# Disallow admin or sensitive areas (none in this case)
+# Disallow: /admin/
+
+# Crawl delay (optional)
+Crawl-delay: 1

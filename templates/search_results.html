@@ -1,114 +1,195 @@
 {% extends "base.html" %}
 
-{% block title %}Search Results for "{{ query }}" - IFSC Code and Bank Details{% endblock %}
+{% block title %}Search Results for "{{ query }}" - IFSC Code Finder{% endblock %}
 
-{% block description %}Search results for "{{ query }}" - Find IFSC codes, bank details, and branch information.{% endblock %}
+{% block description %}Search results for "{{ query }}" - Find IFSC codes and bank branch details.{% endblock %}
 
 {% block content %}
-<div class="row">
-    <div class="col-12">
-        <nav aria-label="breadcrumb">
-            <ol class="breadcrumb">
-                <li class="breadcrumb-item"><a href="{{ url_for('index') }}">Home</a></li>
-                <li class="breadcrumb-item active">Search Results</li>
-            </ol>
-        </nav>
-    </div>
-</div>
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-lg-12">
+            <!-- Search Header -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h1 class="h3 mb-1">Search Results</h1>
+                    <p class="text-muted">
+                        {% if results %}
+                            Found {{ results|length }} result(s) for "<strong>{{ query }}</strong>"
+                        {% else %}
+                            No results found for "<strong>{{ query }}</strong>"
+                        {% endif %}
+                    </p>
+                </div>
+                <a href="{{ url_for('index') }}" class="btn btn-outline-primary">
+                    <i class="fas fa-search me-2"></i>New Search
+                </a>
+            </div>
 
-<div class="row">
-    <div class="col-12">
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <h2>Search Results for "{{ query }}"</h2>
-            <a href="{{ url_for('index') }}" class="btn btn-outline-primary">
-                <i class="fas fa-plus me-2"></i>New Search
-            </a>
-        </div>
-    </div>
-</div>
+            {% if error %}
+            <div class="alert alert-danger" role="alert">
+                <i class="fas fa-exclamation-triangle me-2"></i>{{ error }}
+            </div>
+            {% endif %}
 
-{% if message %}
-<div class="row">
-    <div class="col-12">
-        <div class="alert alert-info">
-            <i class="fas fa-info-circle me-2"></i>{{ message }}
-        </div>
-    </div>
-</div>
-{% endif %}
-
-{% if results %}
-<div class="row">
-    <div class="col-12">
-        <p class="text-muted">Found {{ results|length }} result{{ 's' if results|length != 1 else '' }}</p>
-    </div>
-</div>
-
-<div class="row">
-    {% for result in results %}
-    <div class="col-md-6 mb-4">
-        <div class="card h-100">
-            <div class="card-body">
-                <h5 class="card-title">
-                    <i class="fas fa-university text-primary me-2"></i>{{ result.get('Bank Name', 'N/A') }}
-                </h5>
-                <h6 class="card-subtitle mb-2 text-muted">{{ result.get('Branch', 'N/A') }}</h6>
-                
-                <div class="row">
-                    <div class="col-6">
-                        <p class="mb-1"><strong>IFSC:</strong> <span class="ifsc-code">{{ result.get('IFSC', 'N/A') }}</span></p>
-                        <p class="mb-1"><strong>City:</strong> {{ result.get('City', 'N/A') }}</p>
-                        <p class="mb-1"><strong>State:</strong> {{ result.get('State', 'N/A') }}</p>
-                    </div>
-                    <div class="col-6">
-                        <p class="mb-1"><strong>MICR:</strong> {{ result.get('MICR', 'N/A') }}</p>
-                        <p class="mb-1 small"><strong>Address:</strong> {{ result.get('Address', 'N/A')[:50] }}{% if result.get('Address', '')|length > 50 %}...{% endif %}</p>
+            {% if results %}
+            <!-- Results -->
+            <div class="row">
+                {% for result in results %}
+                <div class="col-lg-6 mb-4">
+                    <div class="card h-100 shadow-sm border-0">
+                        <div class="card-header bg-primary text-white">
+                            <h5 class="mb-0">
+                                <i class="fas fa-university me-2"></i>{{ result.BANK }}
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <h6 class="card-title text-primary">{{ result.BRANCH }}</h6>
+                            
+                            <div class="row mb-3">
+                                <div class="col-sm-4">
+                                    <strong>IFSC Code:</strong>
+                                </div>
+                                <div class="col-sm-8">
+                                    <code class="bg-light p-1">{{ result.IFSC if result.IFSC else 'N/A' }}</code>
+                                    {% if result.IFSC %}
+                                    <button class="btn btn-sm btn-outline-secondary ms-1" 
+                                            onclick="copyToClipboard('{{ result.IFSC }}')">
+                                        <i class="fas fa-copy"></i>
+                                    </button>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            
+                            <div class="row mb-2">
+                                <div class="col-sm-4">
+                                    <strong>Branch Code:</strong>
+                                </div>
+                                <div class="col-sm-8">
+                                    {% if result.IFSC %}
+                                        <code class="bg-success text-white p-1">{{ result.IFSC[-7:] }}</code>
+                                    {% else %}
+                                        N/A
+                                    {% endif %}
+                                </div>
+                            </div>
+                            
+                            <div class="row mb-2">
+                                <div class="col-sm-4">
+                                    <strong>City:</strong>
+                                </div>
+                                <div class="col-sm-8">
+                                    {{ result.CITY2 if result.CITY2 else 'N/A' }}
+                                </div>
+                            </div>
+                            
+                            <div class="row mb-2">
+                                <div class="col-sm-4">
+                                    <strong>District:</strong>
+                                </div>
+                                <div class="col-sm-8">
+                                    {{ result.CITY1 if result.CITY1 else 'N/A' }}
+                                </div>
+                            </div>
+                            
+                            <div class="row mb-2">
+                                <div class="col-sm-4">
+                                    <strong>State:</strong>
+                                </div>
+                                <div class="col-sm-8">
+                                    {{ result.STATE if result.STATE else 'N/A' }}
+                                </div>
+                            </div>
+                            
+                            <div class="row mb-2">
+                                <div class="col-sm-4">
+                                    <strong>Phone:</strong>
+                                </div>
+                                <div class="col-sm-8">
+                                    {% if result.PHONE and result.PHONE != '0' %}
+                                        {% if result['STD CODE'] and result['STD CODE'] != '0' %}{{ result['STD CODE'] }}-{% endif %}{{ result.PHONE }}
+                                    {% else %}
+                                        N/A
+                                    {% endif %}
+                                </div>
+                            </div>
+                            
+                            <div class="row">
+                                <div class="col-sm-4">
+                                    <strong>Address:</strong>
+                                </div>
+                                <div class="col-sm-8">
+                                    {% if result.ADDRESS and result.ADDRESS.strip() %}
+                                        <small class="text-muted">{{ result.ADDRESS }}</small>
+                                    {% else %}
+                                        <small class="text-muted">N/A</small>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-footer bg-transparent">
+                            <a href="{{ url_for('ifsc_detail', ifsc_code=result.IFSC) }}" 
+                               class="btn btn-primary btn-sm">
+                                <i class="fas fa-info-circle me-1"></i>View Details
+                            </a>
+                        </div>
                     </div>
                 </div>
-                
-                <div class="mt-3">
-                    <a href="{{ url_for('ifsc_detail', ifsc_code=result.get('IFSC', '')) }}" 
-                       class="btn btn-primary btn-sm me-2">
-                        <i class="fas fa-info-circle me-1"></i>View Details
-                    </a>
-                    <button class="btn btn-outline-secondary btn-sm" 
-                            onclick="copyToClipboard('{{ result.get('IFSC', '') }}')">
-                        <i class="fas fa-copy me-1"></i>Copy IFSC
-                    </button>
+                {% endfor %}
+            </div>
+            {% else %}
+            <!-- No Results -->
+            <div class="text-center py-5">
+                <i class="fas fa-search fa-4x text-muted mb-4"></i>
+                <h3 class="text-muted">No Results Found</h3>
+                <p class="text-muted mb-4">Try searching with different keywords or check your spelling.</p>
+                <div class="row justify-content-center">
+                    <div class="col-md-6">
+                        <div class="card border-0 bg-light">
+                            <div class="card-body">
+                                <h6 class="card-title">Search Tips:</h6>
+                                <ul class="list-unstyled mb-0 text-start">
+                                    <li><i class="fas fa-check text-success me-2"></i>Use complete IFSC code (11 characters)</li>
+                                    <li><i class="fas fa-check text-success me-2"></i>Try bank name with city</li>
+                                    <li><i class="fas fa-check text-success me-2"></i>Check spelling and try shorter terms</li>
+                                    <li><i class="fas fa-check text-success me-2"></i>Use MICR code (9 digits)</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
-        </div>
-    </div>
-    {% endfor %}
-</div>
-
-{% if results|length >= 50 %}
-<div class="row">
-    <div class="col-12">
-        <div class="alert alert-warning">
-            <i class="fas fa-info-circle me-2"></i>
-            Showing first 50 results. Try a more specific search for better results.
+            {% endif %}
         </div>
     </div>
 </div>
-{% endif %}
+{% endblock %}
 
-{% else %}
-<div class="row justify-content-center">
-    <div class="col-md-6">
-        <div class="card">
-            <div class="card-body text-center">
-                <i class="fas fa-search fa-3x text-muted mb-3"></i>
-                <h4>No Results Found</h4>
-                <p class="text-muted">No matches found for "{{ query }}". Try searching with different keywords.</p>
-                <div class="mt-3">
-                    <a href="{{ url_for('index') }}" class="btn btn-primary">
-                        <i class="fas fa-arrow-left me-2"></i>Back to Search
-                    </a>
+{% block scripts %}
+<script>
+function copyToClipboard(text) {
+    navigator.clipboard.writeText(text).then(function() {
+        // Create temporary toast notification
+        const toast = document.createElement('div');
+        toast.className = 'toast align-items-center text-white bg-success border-0 position-fixed';
+        toast.style.cssText = 'top: 20px; right: 20px; z-index: 9999;';
+        toast.innerHTML = `
+            <div class="d-flex">
+                <div class="toast-body">
+                    <i class="fas fa-check me-2"></i>IFSC code copied to clipboard!
                 </div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
             </div>
-        </div>
-    </div>
-</div>
-{% endif %}
+        `;
+        document.body.appendChild(toast);
+        
+        const bsToast = new bootstrap.Toast(toast);
+        bsToast.show();
+        
+        // Remove toast after it's hidden
+        toast.addEventListener('hidden.bs.toast', function() {
+            document.body.removeChild(toast);
+        });
+    });
+}
+</script>
 {% endblock %}
