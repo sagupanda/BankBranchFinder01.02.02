@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}India's Most Comprehensive IFSC Code & Bank Branch Finder - KnowYourIFSC{% endblock %}
+{% block title %}IFSC Finder - India's Most Comprehensive Bank Branch Directory{% endblock %}
 
 {% block description %}Find IFSC codes and bank branch details for 170,000+ Indian bank branches. Search by IFSC code, bank name, city, state, or branch name. Fast and accurate results from India's most comprehensive bank directory.{% endblock %}
 
@@ -10,8 +10,7 @@
         <div class="row justify-content-center">
             <div class="col-lg-8 text-center">
                 <h1 class="display-4 fw-bold text-primary mb-4">
-                    <img src="{{ url_for('static', filename='images/IFSCBLU.png') }}" alt="KnowYourIFSC" height="64" class="me-3">
-                    KnowYourIFSC
+                    IFSC Code Finder
                 </h1>
                 <p class="lead mb-5">India's Most Comprehensive Bank Branch Directory - 170,000+ Branches at Your Fingertips</p>
                 
@@ -219,7 +218,10 @@
 {% block scripts %}
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    initializeAutocomplete('searchInput', 'autocompleteResults');
+    // Initialize autocomplete when DOM is ready
+    if (typeof initializeAutocomplete === 'function') {
+        initializeAutocomplete('searchInput', 'autocompleteResults');
+    }
     
     // Handle search mode toggle
     const ifscMode = document.getElementById('ifscMode');

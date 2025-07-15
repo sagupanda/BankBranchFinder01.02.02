@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}KnowYourIFSC - India's Most Comprehensive IFSC Code & Bank Branch Finder{% endblock %}</title>
+    <title>{% block title %}IFSC Finder - India's Most Comprehensive Bank Branch Directory{% endblock %}</title>
     <meta name="description" content="{% block description %}Find IFSC codes, bank branches & complete banking details for 170,000+ Indian bank branches. Search by bank name, city, state or branch. Get addresses, phone numbers & branch codes instantly.{% endblock %}">
     <meta name="keywords" content="IFSC code finder, Indian bank branches, bank IFSC search, branch locator, banking details, IFSC code lookup, bank branch finder India, RTGS NEFT codes">
     
@@ -12,7 +12,7 @@
     <!-- Font Awesome Icons -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <!-- Custom CSS -->
-    <link href="{{ url_for('static', filename='css/style.css') }}" rel="stylesheet">
+    <link href="{{ url_for('static', filename='style.css') }}" rel="stylesheet">
     
     {% block head %}{% endblock %}
 </head>
@@ -21,8 +21,8 @@
     <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
         <div class="container">
             <a class="navbar-brand fw-bold" href="{{ url_for('index') }}">
-                <img src="{{ url_for('static', filename='images/IFSCWHT.png') }}" alt="KnowYourIFSC" height="32" class="me-2">
-                KnowYourIFSC
+                <i class="fas fa-university me-2"></i>
+                IFSC Finder
             </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
@@ -70,7 +70,7 @@
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <!-- Custom JS -->
-    <script src="{{ url_for('static', filename='js/autocomplete.js') }}"></script>
+    <script src="{{ url_for('static', filename='autocomplete.js') }}"></script>
     
     <!-- Theme Toggle Script -->
     <script>

@@ -7,6 +7,7 @@ from urllib.parse import quote
 import pandas as pd
 from data_loader import BankDataLoader
 import re
+import requests
 
 # Configure logging
 logging.basicConfig(level=logging.DEBUG)
@@ -35,6 +36,35 @@ def slugify(text):
     text = re.sub(r'[^\w\s-]', '', text)
     text = re.sub(r'[-\s]+', '-', text)
     return text.strip('-')
+
+def get_bank_details_from_razorpay(ifsc_code):
+    """Get bank details from Razorpay IFSC API"""
+    try:
+        url = f"https://ifsc.razorpay.com/{ifsc_code.upper()}"
+        response = requests.get(url, timeout=5)
+        
+        if response.status_code == 200:
+            data = response.json()
+            return {
+                'IFSC': data.get('IFSC', ''),
+                'BANK': data.get('BANK', ''),
+                'BRANCH': data.get('BRANCH', ''),
+                'CITY1': data.get('DISTRICT', ''),
+                'CITY2': data.get('CITY', ''),
+                'STATE': data.get('STATE', ''),
+                'ADDRESS': data.get('ADDRESS', ''),
+                'PHONE': '',
+                'STD CODE': '',
+                'CONTACT': data.get('CONTACT', ''),
+                'RTGS': data.get('RTGS', False),
+                'SWIFT': data.get('SWIFT', ''),
+                'MICR': data.get('MICR', '')
+            }
+        else:
+            return None
+    except Exception as e:
+        logging.error(f"Error fetching from Razorpay API: {e}")
+        return None
 
 # Initialize data when app starts
 with app.app_context():
@@ -113,11 +143,18 @@ def search():
     results = []
     
     if search_type == 'ifsc':
-        # Search by IFSC code
+        # For IFSC search, try exact match first
+        if len(query) == 11 and query.isalnum():
+            # Try Razorpay API first for exact IFSC
+            bank_info = get_bank_details_from_razorpay(query)
+            if bank_info:
+                return redirect(url_for('ifsc_detail', ifsc_code=query.upper()))
+        
+        # Search by IFSC code in CSV data
         filtered_df = df[df['IFSC'].str.contains(query, case=False, na=False)]
         results = filtered_df.to_dict('records')
         
-        # If exact match found, redirect to IFSC detail page
+        # If exact match found in CSV, redirect to IFSC detail page
         exact_match = df[df['IFSC'] == query.upper()]
         if len(exact_match) == 1:
             return redirect(url_for('ifsc_detail', ifsc_code=query.upper()))
@@ -149,20 +186,25 @@ def ifsc_detail(ifsc_code):
     """Show detailed information for a specific IFSC code"""
     df = init_data()
     
-    # Find the bank record
-    bank_record = df[df['IFSC'] == ifsc_code.upper()]
+    # Try to get bank details from Razorpay API first
+    bank_info = get_bank_details_from_razorpay(ifsc_code)
     
-    if bank_record.empty:
+    # If Razorpay API fails, try CSV data
+    if not bank_info:
+        bank_record = df[df['IFSC'] == ifsc_code.upper()]
+        if not bank_record.empty:
+            bank_info = bank_record.iloc[0].to_dict()
+    
+    # If still no data found
+    if not bank_info:
         return render_template('ifsc_detail.html', 
                              ifsc_code=ifsc_code,
                              error="IFSC code not found")
     
-    bank_info = bank_record.iloc[0].to_dict()
-    
-    # Find related branches in the same city
+    # Find related branches in the same city from CSV data
     related_branches = df[
-        (df['BANK'] == bank_info['BANK']) &
-        (df['CITY1'] == bank_info['CITY1']) &
+        (df['BANK'].str.contains(bank_info['BANK'], case=False, na=False)) &
+        (df['CITY1'].str.contains(bank_info['CITY1'], case=False, na=False)) &
         (df['IFSC'] != ifsc_code.upper())
     ].head(5)
     

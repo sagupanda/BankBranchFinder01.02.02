@@ -2,11 +2,23 @@
 
 ## Overview
 
-This is a Flask web application that provides IFSC code lookup functionality for Indian banks. The application allows users to search for bank information using IFSC codes, bank names, cities, or MICR codes. It processes data from an Excel file and provides a user-friendly interface for searching and displaying bank branch details.
+This is a Flask web application that provides IFSC code lookup functionality for Indian banks. The application allows users to search for bank information using IFSC codes, bank names, cities, or branch names. It processes data from 170,671+ bank records stored in CSV files and provides a user-friendly interface for searching and displaying bank branch details.
 
 ## User Preferences
 
 Preferred communication style: Simple, everyday language.
+- Use Razorpay IFSC API for bank details search
+- Use CSV files for IFSC code search and general bank searches
+- Remove duplicate "KnowYourIFSC" branding
+
+## Recent Changes (July 15, 2025)
+
+✓ Integrated Razorpay IFSC API for accurate bank details lookup
+✓ Fixed autocomplete JavaScript functionality 
+✓ Removed duplicate branding text from templates
+✓ Updated data loading to use CSV files (bank_data_1.csv, bank_data_2.csv)
+✓ Fixed template variables from 'branch' to 'bank_info'
+✓ Successfully tested IFSC search and autocomplete functionality
 
 ## System Architecture
 
