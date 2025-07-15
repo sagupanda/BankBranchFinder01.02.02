@@ -6,23 +6,52 @@ import re
 from datetime import datetime
 
 class BankDataProcessor:
-    def __init__(self, excel_file='bank_data.xlsx'):
-        self.excel_file = excel_file
+    def __init__(self, csv_files=['bank_data_1.csv', 'bank_data_2.csv']):
+        self.csv_files = csv_files
         self.data = None
         self.load_data()
         
     def load_data(self):
-        """Load data from Excel file"""
+        """Load data from CSV files"""
         try:
-            if os.path.exists(self.excel_file):
-                self.data = pd.read_excel(self.excel_file)
+            dataframes = []
+            for csv_file in self.csv_files:
+                if os.path.exists(csv_file):
+                    df = pd.read_csv(csv_file)
+                    dataframes.append(df)
+                    logging.info(f"Loaded {len(df)} records from {csv_file}")
+                else:
+                    logging.warning(f"CSV file {csv_file} not found.")
+            
+            if dataframes:
+                # Combine all CSV files
+                self.data = pd.concat(dataframes, ignore_index=True)
+                
+                # Map CSV columns to expected format
+                column_mapping = {
+                    'BANK': 'Bank Name',
+                    'CITY2': 'City',
+                    'BRANCH': 'Branch', 
+                    'IFSC': 'IFSC',
+                    'ADDRESS': 'Address',
+                    'STATE': 'State'
+                }
+                
+                # Rename columns to match expected format
+                self.data = self.data.rename(columns=column_mapping)
+                
+                # Add MICR column if not present (using phone number as placeholder)
+                if 'MICR' not in self.data.columns:
+                    self.data['MICR'] = self.data.get('PHONE', '')
+                
                 # Ensure consistent column names
                 self.data.columns = self.data.columns.str.strip()
                 # Fill NaN values with empty strings
                 self.data = self.data.fillna('')
-                logging.info(f"Loaded {len(self.data)} records from {self.excel_file}")
+                
+                logging.info(f"Combined dataset: {len(self.data)} total records")
             else:
-                logging.warning(f"Excel file {self.excel_file} not found. Using empty dataset.")
+                logging.warning("No CSV files found. Using empty dataset.")
                 # Create empty DataFrame with expected columns
                 self.data = pd.DataFrame(columns=['Bank Name', 'City', 'Branch', 'IFSC', 'MICR', 'Address', 'State'])
         except Exception as e:
