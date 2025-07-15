@@ -1,0 +1,3 @@
+This file should contain the Excel data with columns: Bank Name, City, Branch, IFSC, MICR, Address, State. Since I cannot create actual Excel files, this is a placeholder. In a real implementation, you would place your actual Excel file here with the bank data.
+
+The application will handle the case where this file doesn't exist by creating an empty DataFrame and showing appropriate error messages.

@@ -1,0 +1,123 @@
+{% extends "base.html" %}
+
+{% block title %}IFSC Code Search - Find Bank Details, MICR Codes & Branch Information{% endblock %}
+
+{% block description %}Search IFSC codes, bank details, MICR codes, and branch information for all Indian banks. Fast, accurate, and comprehensive bank code lookup service.{% endblock %}
+
+{% block content %}
+<div class="hero-section text-center mb-5">
+    <h1 class="display-4 fw-bold text-primary mb-3">IFSC Code Search</h1>
+    <p class="lead text-muted">Find bank details, IFSC codes, MICR codes, and branch information instantly</p>
+</div>
+
+<!-- Search Form -->
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="card shadow-sm">
+            <div class="card-body p-4">
+                <form action="{{ url_for('search') }}" method="GET" class="search-form">
+                    <div class="input-group input-group-lg">
+                        <input type="text" 
+                               class="form-control" 
+                               name="q" 
+                               id="searchInput"
+                               placeholder="Enter IFSC code, bank name, city, or MICR code..." 
+                               autocomplete="off"
+                               required>
+                        <button class="btn btn-primary" type="submit">
+                            <i class="fas fa-search"></i> Search
+                        </button>
+                    </div>
+                    <div id="autocomplete-results" class="autocomplete-results"></div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Example Searches -->
+<div class="row mt-5">
+    <div class="col-md-6">
+        <div class="card h-100">
+            <div class="card-body">
+                <h5 class="card-title">
+                    <i class="fas fa-code text-primary me-2"></i>Search by IFSC Code
+                </h5>
+                <p class="card-text">Enter an 11-character IFSC code to get complete branch details including address, MICR code, and contact information.</p>
+                <div class="example-searches">
+                    <p class="mb-2"><strong>Example:</strong></p>
+                    <code class="example-code">SBIN0000123</code>
+                    <code class="example-code">HDFC0000001</code>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6">
+        <div class="card h-100">
+            <div class="card-body">
+                <h5 class="card-title">
+                    <i class="fas fa-building text-primary me-2"></i>Search by Bank & City
+                </h5>
+                <p class="card-text">Search by bank name, city, or branch name to find all matching branches and their IFSC codes.</p>
+                <div class="example-searches">
+                    <p class="mb-2"><strong>Example:</strong></p>
+                    <code class="example-code">State Bank Mumbai</code>
+                    <code class="example-code">HDFC Delhi</code>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-md-6">
+        <div class="card h-100">
+            <div class="card-body">
+                <h5 class="card-title">
+                    <i class="fas fa-calculator text-primary me-2"></i>Search by MICR Code
+                </h5>
+                <p class="card-text">Enter a 9-digit MICR code to find the corresponding bank branch and all related details.</p>
+                <div class="example-searches">
+                    <p class="mb-2"><strong>Example:</strong></p>
+                    <code class="example-code">400002001</code>
+                    <code class="example-code">110002001</code>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6">
+        <div class="card h-100">
+            <div class="card-body">
+                <h5 class="card-title">
+                    <i class="fas fa-info-circle text-primary me-2"></i>Features
+                </h5>
+                <ul class="list-unstyled">
+                    <li><i class="fas fa-check text-success me-2"></i>Fast autocomplete search</li>
+                    <li><i class="fas fa-check text-success me-2"></i>Comprehensive bank database</li>
+                    <li><i class="fas fa-check text-success me-2"></i>Mobile-friendly interface</li>
+                    <li><i class="fas fa-check text-success me-2"></i>SEO-optimized pages</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Search Tips -->
+<div class="row mt-5">
+    <div class="col-12">
+        <div class="alert alert-info">
+            <h6 class="alert-heading">
+                <i class="fas fa-lightbulb me-2"></i>Search Tips
+            </h6>
+            <ul class="mb-0">
+                <li>IFSC codes are 11 characters long (e.g., SBIN0000123)</li>
+                <li>MICR codes are 9 digits long (e.g., 400002001)</li>
+                <li>You can search by partial bank names or city names</li>
+                <li>Use the autocomplete feature for faster searches</li>
+            </ul>
+        </div>
+    </div>
+</div>
+{% endblock %}

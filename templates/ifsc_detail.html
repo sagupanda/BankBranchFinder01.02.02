@@ -1,0 +1,145 @@
+{% extends "base.html" %}
+
+{% block title %}{{ ifsc_code }} - {{ bank_info.get('Bank Name', 'Bank') }} {{ bank_info.get('Branch', 'Branch') }} IFSC Code Details{% endblock %}
+
+{% block description %}Complete details for IFSC code {{ ifsc_code }} - {{ bank_info.get('Bank Name', 'Bank') }} branch in {{ bank_info.get('City', 'City') }}, {{ bank_info.get('State', 'State') }}. Find MICR code, address, and branch information.{% endblock %}
+
+{% block og_title %}{{ ifsc_code }} - {{ bank_info.get('Bank Name', 'Bank') }} IFSC Code Details{% endblock %}
+
+{% block content %}
+{% if error %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-body text-center">
+                <i class="fas fa-exclamation-triangle fa-3x text-warning mb-3"></i>
+                <h3>IFSC Code Not Found</h3>
+                <p class="text-muted">The IFSC code "{{ ifsc_code }}" was not found in our database.</p>
+                <a href="{{ url_for('index') }}" class="btn btn-primary">
+                    <i class="fas fa-arrow-left me-2"></i>Back to Search
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% else %}
+<div class="row">
+    <div class="col-12">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{{ url_for('index') }}">Home</a></li>
+                <li class="breadcrumb-item active">IFSC: {{ ifsc_code }}</li>
+            </ol>
+        </nav>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h2 class="card-title mb-0">
+                    <i class="fas fa-university me-2"></i>{{ bank_info.get('Bank Name', 'N/A') }}
+                </h2>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="info-item">
+                            <label class="fw-bold text-primary">IFSC Code:</label>
+                            <span class="ifsc-code">{{ ifsc_code }}</span>
+                        </div>
+                        
+                        <div class="info-item">
+                            <label class="fw-bold text-primary">Branch:</label>
+                            <span>{{ bank_info.get('Branch', 'N/A') }}</span>
+                        </div>
+                        
+                        <div class="info-item">
+                            <label class="fw-bold text-primary">City:</label>
+                            <span>{{ bank_info.get('City', 'N/A') }}</span>
+                        </div>
+                        
+                        <div class="info-item">
+                            <label class="fw-bold text-primary">State:</label>
+                            <span>{{ bank_info.get('State', 'N/A') }}</span>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <div class="info-item">
+                            <label class="fw-bold text-primary">MICR Code:</label>
+                            <span>{{ bank_info.get('MICR', 'N/A') }}</span>
+                        </div>
+                        
+                        <div class="info-item">
+                            <label class="fw-bold text-primary">Address:</label>
+                            <span>{{ bank_info.get('Address', 'N/A') }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">Quick Actions</h5>
+            </div>
+            <div class="card-body">
+                <a href="{{ url_for('search') }}?q={{ bank_info.get('Bank Name', '') }} {{ bank_info.get('City', '') }}" 
+                   class="btn btn-outline-primary btn-sm w-100 mb-2">
+                    <i class="fas fa-search me-2"></i>Find More Branches
+                </a>
+                
+                <button class="btn btn-outline-secondary btn-sm w-100 mb-2" onclick="copyToClipboard('{{ ifsc_code }}')">
+                    <i class="fas fa-copy me-2"></i>Copy IFSC Code
+                </button>
+                
+                <a href="{{ url_for('index') }}" class="btn btn-outline-success btn-sm w-100">
+                    <i class="fas fa-plus me-2"></i>New Search
+                </a>
+            </div>
+        </div>
+        
+        <div class="card mt-3">
+            <div class="card-header">
+                <h6 class="card-title mb-0">About IFSC Codes</h6>
+            </div>
+            <div class="card-body">
+                <p class="small text-muted">
+                    IFSC (Indian Financial System Code) is an 11-character code used to identify bank branches for electronic fund transfers in India.
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">How to Use This IFSC Code</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-4">
+                        <h6><i class="fas fa-exchange-alt text-primary me-2"></i>NEFT/RTGS</h6>
+                        <p class="small text-muted">Use this IFSC code for National Electronic Fund Transfer (NEFT) and Real Time Gross Settlement (RTGS) transactions.</p>
+                    </div>
+                    <div class="col-md-4">
+                        <h6><i class="fas fa-mobile-alt text-primary me-2"></i>Online Banking</h6>
+                        <p class="small text-muted">Add this IFSC code when setting up beneficiaries in your online banking or mobile banking app.</p>
+                    </div>
+                    <div class="col-md-4">
+                        <h6><i class="fas fa-money-check text-primary me-2"></i>Digital Payments</h6>
+                        <p class="small text-muted">Use this IFSC code for UPI, IMPS, and other digital payment transactions.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endblock %}
